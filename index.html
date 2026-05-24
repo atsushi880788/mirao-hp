@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIRAO — 自刻映像の世界</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400&family=Noto+Sans+JP:wght@200;300;400&display=swap" rel="stylesheet">
+
+<style>
+/* ===== リセット ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ===== 変数 ===== */
+:root {
+  --ink:         #0D0C0A;
+  --copper:      #7A3B2E;
+  --copper-mid:  #9B4A38;
+  --copper-pale: #C4724F;
+  --copper-dim:  #4A2419;
+  --cream:       #EAE4DA;
+  --gray:        #8A837A;
+  --gray-dim:    #524D48;
+  --border:      rgba(122, 59, 46, 0.22);
+  --border-dim:  rgba(122, 59, 46, 0.09);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--cream);
+  font-family: 'Noto Sans JP', 'Jost', sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 1px; }
+::-webkit-scrollbar-track { background: var(--ink); }
+::-webkit-scrollbar-thumb { background: var(--copper-dim); }
+
+/* ===== 背景「刻」===== */
+#koku-bg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Noto Sans JP', serif;
+  font-size: 90vw;
+  font-weight: 300;
+  color: var(--copper-pale);
+  opacity: 0.055;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  white-space: nowrap;
+  transition: opacity 0.8s ease;
+}
+
+/* ===== ページナビ ===== */
+#page-nav {
+  position: fixed;
+  right: 1.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  z-index: 100;
+}
+@media (max-width: 640px) { #page-nav { display: none; } }
+
+.nav-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(122, 59, 46, 0.28);
+  cursor: pointer;
+  transition: all 0.4s ease;
+}
+.nav-dot.active {
+  background: var(--copper-mid);
+  height: 20px;
+  border-radius: 2px;
+}
+
+/* ===== スクロールアニメーション ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity  0.95s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.95s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.on { opacity: 1; transform: translateY(0); }
+.d1 { transition-delay: 0.10s; }
+.d2 { transition-delay: 0.22s; }
+.d3 { transition-delay: 0.34s; }
+.d4 { transition-delay: 0.48s; }
+
+.step-row {
+  opacity: 0;
+  transform: translateX(-18px);
+  transition: opacity 0.72s ease, transform 0.72s ease;
+}
+.step-row.on { opacity: 1; transform: translateX(0); }
+
+/* ===== コンテンツ共通 ===== */
+.content { position: relative; z-index: 1; }
+
+/* ===== PAGE 0：招待コード ===== */
+#page-code {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+}
+#page-code::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 60% 55% at 50% 50%,
+    rgba(122, 59, 46, 0.07) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.logo-block { text-align: center; margin-bottom: 3.6rem; }
+
+.logo-en {
+  font-family: 'Jost', sans-serif;
+  font-size: clamp(2.5rem, 7vw, 3.6rem);
+  font-weight: 200;
+  letter-spacing: 0.58em;
+  color: var(--cream);
+  display: block;
+  margin-bottom: 0.55rem;
+}
+
+.logo-sub {
+  font-size: 0.74rem;
+  letter-spacing: 0.40em;
+  color: var(--copper-mid);
+  display: block;
+  font-weight: 300;
+}
+
+.code-hint {
+  font-size: 0.76rem;
+  letter-spacing: 0.22em;
+  color: var(--gray-dim);
+  text-align: center;
+  line-height: 2.1;
+  margin-bottom: 1.9rem;
+}
+
+.code-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--copper-dim);
+  color: var(--cream);
+  padding: 0.78rem 0;
+  font-family: 'Jost', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.42em;
+  text-align: center;
+  width: 220px;
+  display: block;
+  margin: 0 auto 2rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.code-input:focus { border-bottom-color: var(--copper-mid); }
+.code-input::placeholder { color: rgba(234, 228, 218, 0.14); }
+
+.code-btn {
+  background: transparent;
+  border: 1px solid var(--copper-dim);
+  color: var(--copper-mid);
+  padding: 0.68rem 2.9rem;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.84rem;
+  letter-spacing: 0.36em;
+  cursor: pointer;
+  display: block;
+  margin: 0 auto;
+  transition: all 0.38s;
+  font-weight: 300;
+}
+.code-btn:hover {
+  background: var(--copper);
+  color: var(--ink);
+  border-color: var(--copper);
+}
+
+/* ===== セクション共通 ===== */
+.section {
+  padding: 5.8rem 2rem;
+  border-bottom: 1px solid var(--border-dim);
+  max-width: 660px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.42em;
+  color: var(--copper-mid);
+  margin-bottom: 3rem;
+  display: block;
+  font-weight: 300;
+}
+
+/* ===== PAGE 1：ファーストビュー ===== */
+.hero-head {
+  font-family: 'Jost', sans-serif;
+  font-size: clamp(1.8rem, 4.5vw, 2.3rem);
+  font-weight: 200;
+  color: var(--cream);
+  line-height: 1.42;
+  margin-bottom: 2.8rem;
+  letter-spacing: 0.05em;
+}
+
+.dash-copy {
+  font-size: 1rem;
+  line-height: 2.75;
+  color: var(--gray);
+  letter-spacing: 0.08em;
+  margin-bottom: 2.2rem;
+}
+.dash { color: var(--copper-mid); margin: 0 0.38em; }
+
+.strong-line {
+  font-size: 1.1rem;
+  color: var(--cream);
+  letter-spacing: 0.13em;
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--copper);
+  line-height: 1.88;
+  margin-top: 2.2rem;
+  display: block;
+}
+
+.scroll-cue {
+  margin-top: 3.4rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.34em;
+  color: var(--gray-dim);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 300;
+}
+.scroll-cue::after {
+  content: '';
+  display: block;
+  width: 38px;
+  height: 1px;
+  background: var(--copper-dim);
+}
+
+/* ===== PAGE 2：データ原則 ===== */
+.data-big {
+  font-family: 'Jost', sans-serif;
+  font-size: clamp(1.15rem, 3vw, 1.42rem);
+  font-weight: 200;
+  color: var(--cream);
+  line-height: 1.82;
+  margin-bottom: 2rem;
+  letter-spacing: 0.04em;
+}
+
+.data-body {
+  font-size: 0.9rem;
+  color: var(--gray);
+  line-height: 2.45;
+  letter-spacing: 0.06em;
+  margin-bottom: 1.8rem;
+}
+
+.data-list { list-style: none; margin-top: 1.4rem; }
+
+.data-item {
+  font-size: 0.86rem;
+  letter-spacing: 0.17em;
+  color: var(--gray-dim);
+  padding: 0.92rem 0;
+  border-bottom: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 300;
+}
+.data-item::before { content: '—'; color: var(--copper-dim); }
+.data-item.no { text-decoration: line-through; opacity: 0.38; }
+.data-item.yes { color: var(--cream); opacity: 1; border-bottom: none; }
+
+/* ===== PAGE 3：ミラオとは ===== */
+.miller-origin {
+  font-size: 0.9rem;
+  color: var(--gray);
+  line-height: 2.45;
+  letter-spacing: 0.05em;
+  margin-bottom: 2rem;
+}
+
+.miller-quote {
+  font-family: 'Jost', sans-serif;
+  font-size: 1.08rem;
+  font-weight: 300;
+  color: var(--cream);
+  border-left: 1px solid var(--copper);
+  padding-left: 1.25rem;
+  line-height: 1.98;
+  margin: 2rem 0;
+}
+.miller-quote cite {
+  display: block;
+  font-size: 0.74rem;
+  letter-spacing: 0.28em;
+  color: var(--copper-mid);
+  margin-top: 0.65rem;
+  font-style: normal;
+  font-weight: 300;
+}
+
+.truth-intro {
+  font-size: 0.82rem;
+  letter-spacing: 0.26em;
+  color: var(--copper-mid);
+  margin-bottom: 1.7rem;
+  display: block;
+  font-weight: 300;
+}
+
+.truth-num {
+  font-family: 'Jost', sans-serif;
+  font-size: 2.1rem;
+  color: var(--copper-dim);
+  font-weight: 200;
+  display: block;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+.truth-text {
+  font-size: 0.96rem;
+  line-height: 2.38;
+  color: rgba(234, 228, 218, 0.82);
+  letter-spacing: 0.05em;
+  margin-bottom: 2.3rem;
+}
+.truth-text strong { color: var(--cream); font-weight: 400; }
+
+/* ===== PAGE 4：伝説の男 ===== */
+.rival-copy {
+  font-size: 1rem;
+  line-height: 2.55;
+  color: var(--gray);
+  letter-spacing: 0.07em;
+}
+
+.rival-strong {
+  font-family: 'Jost', sans-serif;
+  font-size: 1.28rem;
+  color: var(--cream);
+  letter-spacing: 0.11em;
+  display: block;
+  margin-top: 1.9rem;
+  line-height: 1.98;
+  font-weight: 200;
+}
+
+/* ===== PAGE 5：コンシェルジュ ===== */
+.concierge-body {
+  font-size: 0.9rem;
+  color: var(--gray);
+  line-height: 2.45;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.4rem;
+}
+
+.concierge-note {
+  font-size: 0.76rem;
+  color: var(--gray-dim);
+  letter-spacing: 0.16em;
+  border: 1px solid var(--border);
+  padding: 0.85rem 1.15rem;
+  line-height: 2.1;
+  font-weight: 300;
+}
+
+/* ===== PAGE 6：MIRAOの一日 ===== */
+.steps-list { list-style: none; margin-top: 0.8rem; }
+
+.step-wrap {
+  display: flex;
+  gap: 1.6rem;
+  margin-bottom: 2.8rem;
+  align-items: flex-start;
+}
+
+.step-num {
+  font-family: 'Jost', sans-serif;
+  font-size: 1.55rem;
+  color: var(--copper-dim);
+  font-weight: 200;
+  line-height: 1;
+  min-width: 2.4rem;
+  margin-top: 0.1rem;
+  letter-spacing: 0.04em;
+}
+
+.step-title {
+  font-size: 0.9rem;
+  letter-spacing: 0.24em;
+  color: var(--cream);
+  margin-bottom: 0.48rem;
+  font-weight: 300;
+}
+
+.step-desc {
+  font-size: 0.88rem;
+  line-height: 2.15;
+  color: var(--gray);
+  letter-spacing: 0.04em;
+}
+.step-hl { color: var(--cream); font-weight: 400; }
+
+/* ===== PAGE 7：自刻映像の価値 ===== */
+.value-copy {
+  font-size: 1rem;
+  line-height: 2.5;
+  color: rgba(234, 228, 218, 0.8);
+  letter-spacing: 0.06em;
+  margin-bottom: 2.5rem;
+}
+
+.value-finale {
+  font-family: 'Jost', sans-serif;
+  font-size: 1.22rem;
+  font-weight: 200;
+  color: var(--cream);
+  line-height: 1.98;
+  border-top: 1px solid var(--border);
+  padding-top: 2rem;
+  letter-spacing: 0.07em;
+}
+
+.ai-note {
+  font-size: 0.78rem;
+  color: var(--gray-dim);
+  letter-spacing: 0.15em;
+  margin-top: 1.9rem;
+  padding: 0.92rem 1.15rem;
+  border: 1px solid var(--border-dim);
+  line-height: 2.1;
+  font-weight: 300;
+}
+
+/* ===== PAGE 8：ケイパビリティ ===== */
+.cap-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.1rem;
+  margin-top: 0.8rem;
+}
+@media (max-width: 480px) { .cap-grid { grid-template-columns: 1fr; } }
+
+.cap-item {
+  padding: 1.4rem 1.2rem;
+  border: 1px solid var(--border-dim);
+  transition: border-color 0.35s;
+}
+.cap-item:hover { border-color: var(--copper-dim); }
+
+.cap-num {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  color: var(--copper-mid);
+  letter-spacing: 0.32em;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 300;
+}
+
+.cap-title {
+  font-size: 0.88rem;
+  color: var(--cream);
+  letter-spacing: 0.13em;
+  margin-bottom: 0.52rem;
+  font-weight: 300;
+}
+
+.cap-desc {
+  font-size: 0.84rem;
+  color: var(--gray);
+  line-height: 1.92;
+  letter-spacing: 0.04em;
+}
+
+/* ===== PAGE 9：権威付け ===== */
+.ref-item {
+  margin-bottom: 2.9rem;
+  padding-bottom: 2.9rem;
+  border-bottom: 1px solid var(--border-dim);
+}
+.ref-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.ref-source {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.34em;
+  color: var(--copper-mid);
+  margin-bottom: 1rem;
+  display: block;
+  font-weight: 300;
+}
+
+.ref-quote {
+  font-family: 'Jost', sans-serif;
+  font-size: 1.06rem;
+  font-weight: 300;
+  color: var(--cream);
+  line-height: 1.92;
+  margin-bottom: 0.82rem;
+  padding-left: 1.15rem;
+  border-left: 1px solid var(--border);
+}
+
+.ref-body {
+  font-size: 0.85rem;
+  color: var(--gray);
+  line-height: 1.97;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.68rem;
+}
+
+.ref-connect {
+  font-size: 0.85rem;
+  color: var(--copper-mid);
+  letter-spacing: 0.11em;
+  font-weight: 300;
+}
+
+/* ===== PAGE 10：予約 ===== */
+#page-reserve {
+  padding: 6.5rem 2rem;
+  text-align: center;
+  position: relative;
+}
+#page-reserve::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 55% 60% at 50% 50%,
+    rgba(122, 59, 46, 0.06) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.reserve-line {
+  font-family: 'Jost', sans-serif;
+  font-size: clamp(1.2rem, 3.2vw, 1.55rem);
+  font-weight: 200;
+  color: var(--cream);
+  letter-spacing: 0.11em;
+  display: block;
+  margin-bottom: 2.6rem;
+}
+
+.reserve-btn {
+  background: transparent;
+  border: 1px solid var(--copper-dim);
+  color: var(--copper-mid);
+  padding: 0.92rem 3.1rem;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.34em;
+  cursor: pointer;
+  transition: all 0.38s;
+  display: inline-block;
+  margin-bottom: 3.2rem;
+  font-weight: 300;
+}
+.reserve-btn:hover {
+  background: var(--copper);
+  color: var(--ink);
+  border-color: var(--copper);
+}
+
+.footer-logo {
+  font-family: 'Jost', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.48em;
+  color: rgba(234, 228, 218, 0.14);
+  display: block;
+  margin-bottom: 0.38rem;
+  font-weight: 200;
+}
+
+.footer-sub {
+  font-size: 0.7rem;
+  letter-spacing: 0.32em;
+  color: rgba(138, 131, 122, 0.28);
+  font-weight: 300;
+}
+</style>
+</head>
+<body>
+
+<!-- 背景「刻」 -->
+<div id="koku-bg" aria-hidden="true">刻</div>
+
+<!-- ページナビ -->
+<nav id="page-nav" aria-label="ページナビゲーション">
+  <div class="nav-dot active"></div>
+  <div class="nav-dot"></div>
+  <div class="nav-dot"></div>
+  <div class="nav-dot"></div>
+  <div class="nav-dot"></div>
+  <div class="nav-dot"></div>
+  <div class="nav-dot"></div>
+  <div class="nav-dot"></div>
+  <div class="nav-dot"></div>
+  <div class="nav-dot"></div>
+</nav>
+
+<!-- コンテンツ -->
+<div class="content">
+
+  <!-- PAGE 0：招待コード -->
+  <section id="page-code" id="sec-0">
+    <div class="logo-block">
+      <span class="logo-en">MIRAO</span>
+      <span class="logo-sub">刻　自刻映像の世界</span>
+    </div>
+    <p class="code-hint">
+      このサービスは紹介制です<br>
+      招待コードをお持ちの方のみお入りください
+    </p>
+    <input
+      class="code-input"
+      type="text"
+      placeholder="招待コード"
+      aria-label="招待コード入力"
+    >
+    <button class="code-btn" onclick="enterSite()">入　る</button>
+  </section>
+
+  <!-- PAGE 1：ファーストビュー -->
+  <section class="section" data-sec="1">
+    <span class="section-label reveal">01</span>
+    <h1 class="hero-head reveal d1">
+      最高の瞬間<br>永遠に刻め
+    </h1>
+    <div class="dash-copy reveal d2">
+      AV <span class="dash">—</span> とっくに飽きた<br>
+      普通のセックスにも <span class="dash">—</span> 飽きた<br>
+      普通のハメ撮りにも <span class="dash">—</span> 飽きた
+    </div>
+    <span class="strong-line reveal d3">ミラオだけが知る遊び方がある</span>
+    <p class="scroll-cue reveal d4">続きを読む</p>
+  </section>
+
+  <!-- PAGE 2：データ原則 -->
+  <section class="section" data-sec="2">
+    <span class="section-label reveal">02　データ原則</span>
+    <p class="data-big reveal d1">
+      あなたのデータは<br>
+      一秒たりとも<br>
+      我々の手元に存在しない
+    </p>
+    <p class="data-body reveal d2">
+      あなたが持参したSDカードに撮影し<br>
+      撮影終了後　その場でお返しする<br>
+      それだけです<br><br>
+      あえて編集はいたしません
+    </p>
+    <ul class="data-list reveal d3">
+      <li class="data-item no">編集　しない</li>
+      <li class="data-item no">コピー　しない</li>
+      <li class="data-item no">サーバーに上げない</li>
+      <li class="data-item yes">これがMIRAOの絶対原則です</li>
+    </ul>
+  </section>
+
+  <!-- PAGE 3：ミラオとは -->
+  <section class="section" data-sec="3">
+    <span class="section-label reveal">03　ミラオとは何か</span>
+    <p class="miller-origin reveal d1">
+      ヘンリー・ミラー（1891-1980）<br>
+      アメリカで30年間発禁となった男<br>
+      益荒男（マスラオ）という古い言葉がある<br>
+      ミラオは　その現代版だ<br>
+      性を極限まで探求し　自分の最高の瞬間を永遠に刻もうとする男
+    </p>
+    <blockquote class="miller-quote reveal d2">
+      「欲望を記録することが　生きた証拠だ」
+      <cite>— ヘンリー・ミラー</cite>
+    </blockquote>
+    <span class="truth-intro reveal d3">ミラオだけが知る真実が　二つある</span>
+    <div class="reveal d3">
+      <span class="truth-num">一</span>
+      <p class="truth-text">
+        自刻映像を観た男は全員　<strong>「もう戻れない」</strong>と言う<br>
+        他人の映像より。スマホハメ撮りより<br>
+        主演が自分自身の映像が　最も深く　最も長く　興奮できる
+      </p>
+      <span class="truth-num">二</span>
+      <p class="truth-text">
+        男は年を取るほど　若い頃のセックスの記憶に興奮する<br>
+        その映像が手元にある男と　記憶しか持たない男では<br>
+        <strong>老いていく時間の質が　根本から変わる</strong>
+      </p>
+    </div>
+  </section>
+
+  <!-- PAGE 4：伝説の男 -->
+  <section class="section" data-sec="4">
+    <span class="section-label reveal">04　伝説の男へ</span>
+    <p class="rival-copy reveal d1">
+      あなたの恋愛セックス自慢に<br>
+      友人も後輩も飽き飽きしている<br><br>
+      だが　自刻映像を持つ男は別格だ
+    </p>
+    <span class="rival-strong reveal d2">
+      秘密の場で<br>
+      一瞬で伝説になれる
+    </span>
+  </section>
+
+  <!-- PAGE 5：コンシェルジュ -->
+  <section class="section" data-sec="5">
+    <span class="section-label reveal">05　コンシェルジュによる設計・伴走（任意）</span>
+    <p class="concierge-body reveal d1">
+      MIRAOでは　撮影前にコンシェルジュによる<br>
+      カウンセリングをご用意しています<br><br>
+      どんな映像にしたいか<br>
+      相手とのコミュニケーションをどう設計するか<br>
+      最高の自刻映像のために　最高のカスタマイズが可能です
+    </p>
+    <div class="concierge-note reveal d2">
+      このカウンセリングは任意です<br>
+      ご希望の方のみ　お申し込みください
+    </div>
+  </section>
+
+  <!-- PAGE 6：MIRAOの一日 -->
+  <section class="section" data-sec="6">
+    <span class="section-label reveal">06　ミラオの一日</span>
+    <ul class="steps-list">
+
+      <li class="step-wrap step-row" data-delay="0">
+        <span class="step-num">00</span>
+        <div>
+          <p class="step-title">カウンセリング（任意）</p>
+          <p class="step-desc">
+            コンシェルジュがご希望をお伺いします<br>
+            映像の構成　相手とのコミュニケーション設計まで<br>
+            <span class="step-hl">最高のカスタマイズをご一緒に</span>
+          </p>
+        </div>
+      </li>
+
+      <li class="step-wrap step-row" data-delay="130">
+        <span class="step-num">01</span>
+        <div>
+          <p class="step-title">予　約</p>
+          <p class="step-desc">
+            招待コード経由で予約フォームを送信<br>
+            ご希望の日時と場所（ホテル等）をお知らせください
+          </p>
+        </div>
+      </li>
+
+      <li class="step-wrap step-row" data-delay="260">
+        <span class="step-num">02</span>
+        <div>
+          <p class="step-title">準　備</p>
+          <p class="step-desc">
+            撮影前日までに担当者よりご連絡します<br>
+            <span class="step-hl">SDカードをご用意ください</span>
+          </p>
+        </div>
+      </li>
+
+      <li class="step-wrap step-row" data-delay="390">
+        <span class="step-num">03</span>
+        <div>
+          <p class="step-title">当　日</p>
+          <p class="step-desc">
+            まずホテルのラウンジで<br>
+            コンシェルジュ・監督とお会いし　打ち解ける時間を設けます<br>
+            <span class="step-hl">（推奨・任意）</span><br><br>
+            その後　お部屋へ<br>
+            あなたのSDカードをカメラにセット<br>
+            コンシェルジュ帯同も可能　<span class="step-hl">撮影開始</span>
+          </p>
+        </div>
+      </li>
+
+      <li class="step-wrap step-row" data-delay="520">
+        <span class="step-num">04</span>
+        <div>
+          <p class="step-title">終　了</p>
+          <p class="step-desc">
+            <span class="step-hl">その場でSDカードをお返しします</span><br>
+            データは一秒たりとも我々の手元に存在しません
+          </p>
+        </div>
+      </li>
+
+      <li class="step-wrap step-row" data-delay="650">
+        <span class="step-num">05</span>
+        <div>
+          <p class="step-title">自刻映像の進化</p>
+          <p class="step-desc">
+            SDカード内の映像があなただけの「自刻映像」です<br>
+            希望される方にはAI加工コンテンツのご案内もします
+          </p>
+        </div>
+      </li>
+
+    </ul>
+  </section>
+
+  <!-- PAGE 7：自刻映像の価値 -->
+  <section class="section" data-sec="7">
+    <span class="section-label reveal">07　自刻映像とは何か</span>
+    <p class="value-copy reveal d1">
+      プロのAV監督が　最高の設備と技術を使い<br>
+      あなただけのために撮る<br>
+      データは　あなたの手を一瞬も離れない<br>
+      その映像は　AIで無限に進化する
+    </p>
+    <div class="value-finale reveal d2">
+      今の最高の自分を刻め<br>
+      一生の宝物を獲よう
+    </div>
+    <div class="ai-note reveal d3">
+      AIで自刻映像をさらに進化させる方法については<br>
+      予約確定後に詳細をご案内します
+    </div>
+  </section>
+
+  <!-- PAGE 8：ケイパビリティ -->
+  <section class="section" data-sec="8">
+    <span class="section-label reveal">08　なぜMIRAOにしか出来ないか</span>
+    <div class="cap-grid reveal d1">
+      <div class="cap-item">
+        <span class="cap-num">01</span>
+        <p class="cap-title">AV監督（映像作家）</p>
+        <p class="cap-desc">日本のAV監督は世界で最も映像美にこだわる職人集団です。照明　構図　演出　全てをプロが設計します</p>
+      </div>
+      <div class="cap-item">
+        <span class="cap-num">02</span>
+        <p class="cap-title">完全招待制</p>
+        <p class="cap-desc">招待された顧客のみに本サービスは提供いたします。顧客の情報は一切受け取りません。本名も伺いません</p>
+      </div>
+      <div class="cap-item">
+        <span class="cap-num">03</span>
+        <p class="cap-title">コンシェルジュによる設計・伴走</p>
+        <p class="cap-desc">映像の企画・構成をコンシェルジュと議論できます。安心して撮影に臨める体制を整えます</p>
+      </div>
+      <div class="cap-item">
+        <span class="cap-num">04</span>
+        <p class="cap-title">自刻映像の進化</p>
+        <p class="cap-desc">「自分が主演するセックス映像」をサービスとして提供しているのは世界中でMIRAOだけです</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 9：権威付け -->
+  <section class="section" data-sec="9">
+    <span class="section-label reveal">09　ミラオの系譜</span>
+
+    <div class="ref-item reveal d1">
+      <span class="ref-source">HENRY MILLER — TROPIC OF CANCER, 1934</span>
+      <p class="ref-quote">「欲望を記録することが　生きた証拠だ」</p>
+      <p class="ref-body">米国で30年間発禁となった書。自分の性を自分のために記録することを「生の最も誠実な表現」と言い放った男。ジョージ・オーウェルが「最も重要な本」と評した</p>
+      <p class="ref-connect">ミラーは書き残した。ミラオは映像で刻む</p>
+    </div>
+
+    <div class="ref-item reveal d2">
+      <span class="ref-source">AMERICAN PSYCHO — MARY HARRON, 2000</span>
+      <p class="ref-quote">成功者は　女よりも　自分自身に興奮する</p>
+      <p class="ref-body">鍛え上げた身体で　最高のセックスをした。その瞬間　鏡に映る自分の姿を凝視した男。自分の最高の瞬間を目撃することへの欲求は　普遍的だ</p>
+      <p class="ref-connect">自刻映像は　その欲求に応える唯一の手段だ</p>
+    </div>
+
+    <div class="ref-item reveal d3">
+      <span class="ref-source">MARCEL PROUST — À LA RECHERCHE DU TEMPS PERDU, 1913</span>
+      <p class="ref-quote">
+        過去の官能の記憶は<br>
+        現在のいかなる快楽よりも強烈に　人を支配する
+      </p>
+      <p class="ref-body">記憶しか持たない男と　映像を持つ男では　老いていく時間の質が根本から変わる</p>
+      <p class="ref-connect">映像を持つ男だけが　時間を味方にできる</p>
+    </div>
+  </section>
+
+  <!-- PAGE 10：予約 -->
+  <section id="page-reserve" data-sec="10">
+    <span class="reserve-line reveal">では　自刻を始めましょう</span>
+    <button class="reserve-btn reveal d1">予約フォームへ</button>
+    <span class="footer-logo">MIRAO</span>
+    <span class="footer-sub">刻　自刻映像の世界</span>
+  </section>
+
+</div><!-- /content -->
+
+<script>
+// ===== 招待コード =====
+function enterSite() {
+  const input = document.querySelector('.code-input');
+  const code  = input ? input.value.trim() : '';
+  // デモ：空欄でも通過（本番は認証APIに差し替える）
+  document.getElementById('page-code').style.display = 'none';
+  const first = document.querySelector('[data-sec="1"]');
+  if (first) first.scrollIntoView({ behavior: 'smooth' });
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') enterSite();
+});
+
+// ===== スクロールアニメーション（reveal） =====
+const revealEls = document.querySelectorAll('.reveal');
+const stepEls   = document.querySelectorAll('.step-row');
+
+const revObs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('on');
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+
+revealEls.forEach(el => revObs.observe(el));
+
+const stepObs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const delay = parseInt(entry.target.dataset.delay || 0);
+      setTimeout(() => entry.target.classList.add('on'), delay);
+    }
+  });
+}, { threshold: 0.1 });
+
+stepEls.forEach(el => stepObs.observe(el));
+
+// ===== ページナビ更新 =====
+const sections = document.querySelectorAll('[data-sec], #page-code');
+const dots     = document.querySelectorAll('.nav-dot');
+
+const navObs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const el  = entry.target;
+    const idx = el.id === 'page-code'
+      ? 0
+      : parseInt(el.dataset.sec || 0);
+    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+  });
+}, { threshold: 0.4 });
+
+sections.forEach(s => navObs.observe(s));
+</script>
+</body>
+</html>
