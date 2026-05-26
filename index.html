@@ -928,14 +928,48 @@ body {
 
 <script>
 // ===== 招待コード =====
-function enterSite() {
+async function enterSite() {
   const input = document.querySelector('.code-input');
   const code  = input ? input.value.trim() : '';
-  // デモ：空欄でも通過（本番は認証APIに差し替える）
-  document.getElementById('page-code').style.display = 'none';
-  const first = document.querySelector('[data-sec="1"]');
-  if (first) first.scrollIntoView({ behavior: 'smooth' });
+  const btn   = document.querySelector('.code-btn');
+
+  if (!code) {
+    input.style.borderBottomColor = '#7A3B2E';
+    input.placeholder = 'コードを入力してください';
+    return;
+  }
+
+  // ボタンを無効化
+  btn.textContent = '確認中';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    });
+    const data = await res.json();
+
+    if (data.valid) {
+      document.getElementById('page-code').style.display = 'none';
+      const first = document.querySelector('[data-sec="1"]');
+      if (first) first.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      input.value = '';
+      input.style.borderBottomColor = '#7A3B2E';
+      input.placeholder = '無効なコードです';
+      btn.textContent = '入　る';
+      btn.disabled = false;
+    }
+  } catch (err) {
+    // API接続エラー時もHPに入れる（フォールバック）
+    document.getElementById('page-code').style.display = 'none';
+    const first = document.querySelector('[data-sec="1"]');
+    if (first) first.scrollIntoView({ behavior: 'smooth' });
+  }
 }
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter') enterSite();
 });
