@@ -1,4 +1,7 @@
-const VALID_CODES = {
+import { kv } from '@vercel/kv';
+
+// デフォルトのコード（KVに名前がない場合のフォールバック）
+const DEFAULT_CODES = {
   '00111': '三島',
   '00112': '小川',
   '00113': '朝倉',
@@ -11,50 +14,83 @@ const VALID_CODES = {
   '00120': '未割当',
 };
 
-async function kvCall(url, token, command) {
-  const res = await fetch(`${url}/${command.join('/')}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.json();
+async function getCodeNames() {
+  const saved = await kv.get('code_names');
+  if (saved && typeof saved === 'object') {
+    return { ...DEFAULT_CODES, ...saved };
+  }
+  return { ...DEFAULT_CODES };
 }
 
 export default async function handler(req, res) {
+  // CORSヘッダー
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
   const { code } = req.body;
-  if (!code) return res.status(400).json({ valid: false, message: 'コードが入力されていません' });
+
+  if (!code) {
+    return res.status(400).json({ valid: false, message: 'コードが入力されていません' });
+  }
 
   const trimmedCode = code.trim();
-  if (!VALID_CODES[trimmedCode]) {
+
+  // KVから最新の紹介者名を取得
+  let codeNames;
+  try {
+    codeNames = await getCodeNames();
+  } catch {
+    codeNames = { ...DEFAULT_CODES };
+  }
+
+  // コードの有効性チェック
+  if (!codeNames[trimmedCode]) {
     return res.status(200).json({ valid: false, message: '無効なコードです' });
   }
 
+  // ログを記録
   try {
-    const url = process.env.KV_REST_API_URL;
-    const token = process.env.KV_REST_API_TOKEN;
-
     const now = new Date().toLocaleString('ja-JP', {
       timeZone: 'Asia/Tokyo',
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
     });
 
-    const entry = JSON.stringify({
+    const logEntry = {
       code: trimmedCode,
-      referrer: VALID_CODES[trimmedCode],
+      referrer: codeNames[trimmedCode],
       timestamp: now,
+      ip: req.headers['x-forwarded-for'] || 'unknown',
+    };
+
+    // KVにログを追加（リスト形式）
+    await kv.lpush('access_logs', JSON.stringify(logEntry));
+
+    // コードごとのカウントも記録
+    await kv.incr(`count_${trimmedCode}`);
+
+    return res.status(200).json({
+      valid: true,
+      message: 'アクセスを受け付けました',
     });
-
-    await kvCall(url, token, ['lpush', 'access_logs', encodeURIComponent(entry)]);
-    await kvCall(url, token, ['incr', `count_${trimmedCode}`]);
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error('KV error:', error);
+    // KVエラーでも認証は通過させる
+    return res.status(200).json({
+      valid: true,
+      message: 'アクセスを受け付けました',
+    });
   }
-
-  return res.status(200).json({ valid: true });
 }
