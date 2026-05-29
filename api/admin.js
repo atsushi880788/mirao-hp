@@ -1,4 +1,4 @@
-const DEFAULT_CODES =  {
+const DEFAULT_CODES =   {
   '00111': '三島',
   '00112': '小川',
   '00113': '朝倉',
