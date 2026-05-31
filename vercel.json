@@ -1,1 +1,10 @@
-{"version":2}
+{
+  "version": 2,
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://mirao.jp/$1",
+      "permanent": true
+    }
+  ]
+}
