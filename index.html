@@ -927,6 +927,10 @@ body {
 </div><!-- /content -->
 
 <script>
+// ===== Vercelドメインからmirao.jpへリダイレクト =====
+if (location.hostname === "mirao-hp.vercel.app" || location.hostname.endsWith(".vercel.app")) {
+  location.replace("https://mirao.jp" + location.pathname + location.search);
+}
 // ===== 招待コード =====
 async function enterSite() {
   const input = document.querySelector('.code-input');
