@@ -1,3 +1,11 @@
 {
-  "version": 2
+  "version": 2,
+  "redirects": [
+    {
+      "source": "/((?!api/).*)",
+      "has": [{ "type": "host", "value": "mirao-hp.vercel.app" }],
+      "destination": "https://www.mirao.jp/$1",
+      "permanent": true
+    }
+  ]
 }
