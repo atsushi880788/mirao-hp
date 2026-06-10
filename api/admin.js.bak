@@ -1,5 +1,3 @@
-import crypto from 'crypto';
-
 const DEFAULT_CODES =   {
   '00111': '三島',
   '00112': '小川',
@@ -13,41 +11,12 @@ const DEFAULT_CODES =   {
   '00120': '未割当',
 };
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_PASSWORD = 'Froption88';
 const KV_URL = process.env.KV_REST_API_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN;
 
 function esc(str) {
   return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function getSessionToken() {
-  return crypto.createHash('sha256').update(ADMIN_PASSWORD).digest('hex');
-}
-
-function parseCookies(req) {
-  const header = req.headers.cookie || '';
-  const cookies = {};
-  header.split(';').forEach(pair => {
-    const [k, ...v] = pair.trim().split('=');
-    if (k) cookies[k.trim()] = v.join('=').trim();
-  });
-  return cookies;
-}
-
-function isAuthed(req) {
-  // (a) Cookie認証
-  const cookies = parseCookies(req);
-  if (cookies.mirao_admin === getSessionToken()) return true;
-  // (b) フォールバック：query or body の password（後で削除予定）
-  if (req.query && req.query.password === ADMIN_PASSWORD) return true;
-  if (req.body && req.body.password === ADMIN_PASSWORD) return true;
-  return false;
-}
-
-function setAuthCookie(res) {
-  const token = getSessionToken();
-  res.setHeader('Set-Cookie', `mirao_admin=${token}; HttpOnly; Secure; SameSite=Strict; Path=/api/admin; Max-Age=86400`);
 }
 
 async function kvGet(key) {
@@ -87,8 +56,34 @@ async function getCodeMap() {
   return { ...DEFAULT_CODES };
 }
 
-function loginFormHTML(errorMsg) {
-  return `<!DOCTYPE html>
+export default async function handler(req, res) {
+  // POST: 個別コードの名前保存
+  if (req.method === 'POST') {
+    const { password, code, name } = req.body;
+    if (password !== ADMIN_PASSWORD) {
+      return res.status(401).json({ error: '認証エラー' });
+    }
+    if (!code || !DEFAULT_CODES.hasOwnProperty(code)) {
+      return res.status(400).json({ error: '無効なコード' });
+    }
+    const newName = (name || '').trim() || '未割当';
+    try {
+      const current = await getCodeMap();
+      current[code] = newName;
+      await kvSet('code_map', JSON.stringify(current));
+      return res.status(200).json({ ok: true, name: newName });
+    } catch (e) {
+      console.error('Save error:', e);
+      return res.status(500).json({ error: '保存に失敗しました' });
+    }
+  }
+
+  // GET: 管理画面
+  const { password } = req.query;
+
+  if (password !== ADMIN_PASSWORD) {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.status(200).send(`<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -108,70 +103,18 @@ function loginFormHTML(errorMsg) {
   button { background:transparent; border:1px solid #5C2D22; color:#9B4A38;
     padding:0.6rem 2rem; font-size:0.7rem; letter-spacing:0.3em; cursor:pointer; }
   button:hover { background:#7A3B2E; color:#0D0C0A; }
-  .error { color:#C44; font-size:0.7rem; letter-spacing:0.1em; margin-bottom:1rem; }
 </style>
 </head>
 <body>
 <div class="box">
   <h1>MIRAO ADMIN</h1>
-  ${errorMsg ? `<p class="error">${esc(errorMsg)}</p>` : ''}
-  <form method="POST" action="/api/admin">
-    <input name="password" type="password" placeholder="パスワード">
+  <form onsubmit="location.href='/api/admin?password='+document.getElementById('pw').value;return false;">
+    <input id="pw" type="password" placeholder="パスワード">
     <button type="submit">入　る</button>
   </form>
 </div>
 </body>
-</html>`;
-}
-
-export default async function handler(req, res) {
-  // POST
-  if (req.method === 'POST') {
-    const { code, name, password } = req.body || {};
-
-    // ログインリクエスト（password のみ、code なし）
-    if (!code && password !== undefined) {
-      if (password === ADMIN_PASSWORD) {
-        setAuthCookie(res);
-        res.writeHead(302, { Location: '/api/admin' });
-        return res.end();
-      } else {
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        return res.status(401).send(loginFormHTML('パスワードが正しくありません'));
-      }
-    }
-
-    // 名前保存リクエスト（既存の保存処理）
-    if (!isAuthed(req)) {
-      return res.status(401).json({ error: '認証エラー' });
-    }
-    if (!code || !DEFAULT_CODES.hasOwnProperty(code)) {
-      return res.status(400).json({ error: '無効なコード' });
-    }
-    const newName = (name || '').trim() || '未割当';
-    try {
-      const current = await getCodeMap();
-      current[code] = newName;
-      await kvSet('code_map', JSON.stringify(current));
-      return res.status(200).json({ ok: true, name: newName });
-    } catch (e) {
-      console.error('Save error:', e);
-      return res.status(500).json({ error: '保存に失敗しました' });
-    }
-  }
-
-  // GET: 管理画面
-  const hasQueryPassword = req.query && req.query.password === ADMIN_PASSWORD;
-
-  if (!isAuthed(req)) {
-    // 未認証 → ログインフォーム
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    return res.status(200).send(loginFormHTML());
-  }
-
-  // フォールバック経路：GETのquery.passwordで認証された場合、Cookieもセットする（次回以降URLパスワード不要）
-  if (hasQueryPassword) {
-    setAuthCookie(res);
+</html>`);
   }
 
   // 認証OK — データ取得
@@ -319,7 +262,7 @@ async function saveName(code) {
     var r = await fetch('/api/admin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: code, name: inp.value.trim() }),
+      body: JSON.stringify({ password: '${ADMIN_PASSWORD}', code: code, name: inp.value.trim() }),
     });
     var data = await r.json();
     if (data.ok) {
