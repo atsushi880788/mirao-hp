@@ -36,13 +36,8 @@ function parseCookies(req) {
 }
 
 function isAuthed(req) {
-  // (a) Cookie認証
   const cookies = parseCookies(req);
-  if (cookies.mirao_admin === getSessionToken()) return true;
-  // (b) フォールバック：query or body の password（後で削除予定）
-  if (req.query && req.query.password === ADMIN_PASSWORD) return true;
-  if (req.body && req.body.password === ADMIN_PASSWORD) return true;
-  return false;
+  return cookies.mirao_admin === getSessionToken();
 }
 
 function setAuthCookie(res) {
@@ -161,17 +156,10 @@ export default async function handler(req, res) {
   }
 
   // GET: 管理画面
-  const hasQueryPassword = req.query && req.query.password === ADMIN_PASSWORD;
-
   if (!isAuthed(req)) {
     // 未認証 → ログインフォーム
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     return res.status(200).send(loginFormHTML());
-  }
-
-  // フォールバック経路：GETのquery.passwordで認証された場合、Cookieもセットする（次回以降URLパスワード不要）
-  if (hasQueryPassword) {
-    setAuthCookie(res);
   }
 
   // 認証OK — データ取得
