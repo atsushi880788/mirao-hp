@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIRAO — The Art of Self-Engraving</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&family=Noto+Serif+JP:wght@200;300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0D0C0A;
+  --ink-soft:#15130F;
+  --paper:#E8E3D8;
+  --paper-dim:#A8A293;
+  --copper:#B06A3A;
+  --copper-bright:#C8824E;
+  --line:rgba(176,106,58,0.28);
+  --serif:"Cormorant Garamond",serif;
+  --sans:"Jost",sans-serif;
+  --jp:"Noto Serif JP",serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);
+  color:var(--paper);
+  font-family:var(--sans);
+  font-weight:300;
+  line-height:1.85;
+  overflow-x:hidden;
+  letter-spacing:0.02em;
+}
+.koku-bg{
+  position:fixed;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  font-family:var(--jp);
+  font-size:78vh;
+  color:rgba(176,106,58,0.035);
+  z-index:0;
+  pointer-events:none;
+  user-select:none;
+}
+.wrap{position:relative;z-index:1}
+
+/* GATE */
+.gate{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;
+  padding:2rem;
+}
+.gate .mark{
+  font-family:var(--jp);
+  font-size:5rem;
+  color:var(--copper);
+  font-weight:200;
+  line-height:1;
+  margin-bottom:2.5rem;
+  opacity:0;
+  animation:rise 1.6s ease forwards;
+}
+.gate .brand{
+  font-family:var(--serif);
+  font-size:1.4rem;
+  letter-spacing:0.5em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:3.5rem;
+  padding-left:0.5em;
+  opacity:0;
+  animation:rise 1.6s ease 0.3s forwards;
+}
+.gate .note{
+  font-size:0.82rem;
+  color:var(--paper-dim);
+  letter-spacing:0.12em;
+  max-width:30rem;
+  line-height:2.2;
+  opacity:0;
+  animation:rise 1.6s ease 0.6s forwards;
+}
+.code-input{
+  background:transparent;
+  border:none;
+  border-bottom:1px solid rgba(176,106,58,0.35);
+  color:var(--paper);
+  padding:0.78rem 0;
+  font-family:var(--sans);
+  font-size:1.1rem;
+  letter-spacing:0.42em;
+  text-align:center;
+  width:220px;
+  display:block;
+  margin:2.5rem auto 0;
+  outline:none;
+  transition:border-color 0.3s;
+  opacity:0;
+  animation:rise 1.6s ease 0.7s forwards;
+}
+.code-input:focus{border-bottom-color:var(--copper-bright)}
+.code-input::placeholder{color:rgba(232,227,216,0.18);letter-spacing:0.2em;font-size:0.88rem}
+.gate .enter{
+  margin-top:2rem;
+  display:inline-block;
+  border:1px solid var(--line);
+  color:var(--paper);
+  background:transparent;
+  cursor:pointer;
+  padding:1rem 3.5rem;
+  font-family:var(--sans);
+  font-size:0.78rem;
+  letter-spacing:0.4em;
+  text-transform:uppercase;
+  transition:all 0.6s ease;
+  opacity:0;
+  animation:rise 1.6s ease 0.9s forwards;
+}
+.gate .enter:hover{
+  background:var(--copper);
+  border-color:var(--copper);
+  color:var(--ink);
+}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTIONS */
+section{
+  max-width:54rem;
+  margin:0 auto;
+  padding:9rem 2.5rem;
+  border-top:1px solid rgba(176,106,58,0.10);
+}
+.idx{
+  font-family:var(--serif);
+  font-size:0.9rem;
+  color:var(--copper);
+  letter-spacing:0.4em;
+  margin-bottom:2.5rem;
+  display:block;
+}
+h1{
+  font-family:var(--serif);
+  font-weight:300;
+  font-size:clamp(2.4rem,6vw,4rem);
+  line-height:1.15;
+  margin-bottom:2rem;
+  letter-spacing:-0.01em;
+}
+h2{
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:clamp(1.8rem,4vw,2.6rem);
+  line-height:1.25;
+  margin-bottom:2rem;
+}
+.lead{
+  font-size:1.15rem;
+  color:#F2EEE4;
+  line-height:2;
+}
+.dim{color:var(--paper-dim)}
+.copper{color:var(--copper-bright)}
+p{margin-bottom:1.4rem;font-size:1.02rem}
+.big{
+  font-family:var(--serif);
+  font-size:clamp(1.6rem,4vw,2.3rem);
+  line-height:1.4;
+  font-weight:300;
+}
+em{font-style:italic;color:var(--copper-bright)}
+.jp-term{
+  font-family:var(--jp);
+  font-weight:300;
+  color:var(--copper-bright);
+}
+.rule{
+  width:3rem;height:1px;
+  background:var(--copper);
+  margin:2.5rem 0;
+}
+.quote{
+  font-family:var(--serif);
+  font-style:italic;
+  font-size:1.5rem;
+  line-height:1.5;
+  color:var(--paper);
+  padding-left:1.8rem;
+  border-left:1px solid var(--copper);
+  margin:3rem 0;
+}
+.quote cite{
+  display:block;
+  font-style:normal;
+  font-family:var(--sans);
+  font-size:0.78rem;
+  letter-spacing:0.2em;
+  color:var(--paper-dim);
+  margin-top:1.2rem;
+  text-transform:uppercase;
+}
+.principle{list-style:none;margin:2.5rem 0}
+.principle li{
+  font-family:var(--serif);
+  font-size:1.5rem;
+  padding:1rem 0;
+  border-bottom:1px solid rgba(176,106,58,0.12);
+  color:var(--paper);
+}
+.principle li span{color:var(--copper);margin-right:1rem}
+.reveal-num{
+  font-family:var(--jp);
+  font-size:2.2rem;
+  color:var(--copper);
+  font-weight:200;
+  display:block;
+  margin-bottom:1.2rem;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:2.5rem;
+  margin-top:3rem;
+}
+.card .n{
+  font-family:var(--serif);
+  font-size:1rem;
+  color:var(--copper);
+  letter-spacing:0.3em;
+  display:block;
+  margin-bottom:1rem;
+}
+.card h3{
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:1.4rem;
+  margin-bottom:0.8rem;
+}
+.card p{font-size:0.92rem;color:var(--paper-dim);line-height:1.9}
+.flow{list-style:none;margin-top:3rem}
+.flow li{
+  display:flex;
+  gap:2rem;
+  padding:2rem 0;
+  border-bottom:1px solid rgba(176,106,58,0.10);
+}
+.flow .step{
+  font-family:var(--serif);
+  font-size:1.6rem;
+  color:var(--copper);
+  min-width:3rem;
+  font-weight:300;
+}
+.flow .body h3{
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:1.3rem;
+  margin-bottom:0.6rem;
+  letter-spacing:0.15em;
+}
+.flow .body p{font-size:0.92rem;color:var(--paper-dim);margin:0;line-height:1.9}
+.lineage{margin-top:3rem}
+.lineage .item{
+  padding:2.5rem 0;
+  border-bottom:1px solid rgba(176,106,58,0.12);
+}
+.lineage .src{
+  font-family:var(--sans);
+  font-size:0.72rem;
+  letter-spacing:0.28em;
+  color:var(--copper);
+  text-transform:uppercase;
+  display:block;
+  margin-bottom:1.5rem;
+}
+.lineage .claim{
+  font-family:var(--serif);
+  font-size:1.4rem;
+  font-style:italic;
+  line-height:1.5;
+  margin-bottom:1.2rem;
+}
+.lineage .gloss{font-size:0.92rem;color:var(--paper-dim);line-height:1.95}
+.cta{
+  text-align:center;
+  padding:11rem 2.5rem;
+}
+.cta .big{margin-bottom:3rem}
+.cta a{
+  display:inline-block;
+  border:1px solid var(--copper);
+  color:var(--paper);
+  text-decoration:none;
+  padding:1.2rem 4rem;
+  font-size:0.8rem;
+  letter-spacing:0.4em;
+  text-transform:uppercase;
+  transition:all 0.6s ease;
+}
+.cta a:hover{background:var(--copper);color:var(--ink)}
+footer{
+  text-align:center;
+  padding:5rem 2rem;
+  border-top:1px solid rgba(176,106,58,0.10);
+}
+footer .mark{font-family:var(--jp);font-size:2.4rem;color:var(--copper);font-weight:200}
+footer .brand{
+  font-family:var(--serif);
+  letter-spacing:0.5em;
+  font-size:0.9rem;
+  color:var(--paper-dim);
+  margin-top:1rem;
+  text-transform:uppercase;
+}
+@media(max-width:680px){
+  .grid{grid-template-columns:1fr}
+  section{padding:6rem 1.6rem}
+  .koku-bg{font-size:60vh}
+}
+</style>
+</head>
+<body>
+<div class="koku-bg">刻</div>
+<div class="wrap">
+
+<!-- GATE -->
+<div class="gate" id="page-code">
+  <div class="mark">刻</div>
+  <div class="brand">Mirao</div>
+  <div class="note">
+    This service is by introduction only.<br>
+    Entry is reserved for those who hold an invitation code.
+  </div>
+  <input
+    class="code-input"
+    type="text"
+    placeholder="Invitation Code"
+    aria-label="Enter invitation code"
+  >
+  <button class="enter" onclick="enterSite()">Enter</button>
+</div>
+
+<!-- 01 PROVOCATION -->
+<section id="01">
+  <span class="idx">01</span>
+  <h1>Engrave your finest moment.<br>Keep it forever.</h1>
+  <p class="lead">
+    Adult films — you tired of them long ago.<br>
+    Ordinary sex — that too.<br>
+    Even filming it yourself on a phone — already dull.
+  </p>
+  <div class="rule"></div>
+  <p class="big">There is a way to play that only MIRAO knows.</p>
+</section>
+
+<!-- 02 THE RARITY (AV DIRECTOR — promoted to the spine) -->
+<section id="02">
+  <span class="idx">02 — Why this exists nowhere else</span>
+  <h2>You grew up watching them.<br>Now one of them films <em>you</em>.</h2>
+  <p class="dim">
+    Japanese adult film holds a devoted following across the world. For most men outside Japan the director was always a myth behind the screen — the unseen hand that shaped a grammar of desire they learned by heart.
+  </p>
+  <p class="dim">
+    MIRAO places that hand on your story.
+  </p>
+  <div class="rule"></div>
+  <p class="big">The world's most obsessive craftsmen of intimacy.</p>
+  <p class="dim">
+    The reputation of Japanese making — <em>monozukuri</em> — was built on a single creed: the pursuit of perfection, refined over decades. Lighting. Framing. Direction. But the true mastery lies elsewhere — in reading the air of the room, in drawing the woman's tension to its peak, in shaping the flow of the moment as it breathes. This cannot be learned from equipment. It is the craft of the Japanese adult director, applied to a subject the rest of the world films only crudely.
+  </p>
+  <div class="rule"></div>
+  <p class="big copper">In your own country, this cannot be bought.</p>
+  <p class="dim">
+    Search the world and you will find only one thing: the staging of nudity — soft light, lingerie, suggestion. The moment itself, the truth of the act, is captured nowhere. No studio films it. What MIRAO offers is a line no service on earth has crossed: a real Japanese director, the finest equipment, composing the real moment as cinema.
+  </p>
+</section>
+
+<!-- 03 DATA PRINCIPLE -->
+<section id="03">
+  <span class="idx">03 — The Principle of Data</span>
+  <h2>Your footage never exists<br>in our hands. Not for a second.</h2>
+  <p class="dim">
+    We film onto the SD card you bring. The moment we finish, it is returned to you. That is all.
+  </p>
+  <p class="dim">We deliberately leave it unedited.</p>
+  <ul class="principle">
+    <li><span>—</span>We do not edit.</li>
+    <li><span>—</span>We do not copy.</li>
+    <li><span>—</span>We never upload to a server.</li>
+    <li><span>—</span>This is MIRAO's absolute law.</li>
+  </ul>
+</section>
+
+<!-- 04 WHAT IS MIRAO -->
+<section id="04">
+  <span class="idx">04 — What MIRAO Means</span>
+  <h2>Henry Miller. <span class="jp-term">益荒男</span>.</h2>
+  <p class="dim">
+    Henry Miller (1891–1980) — the man banned in America for thirty years. There is an old Japanese word, <em>masurao</em>: a man of full vigor. MIRAO is its modern form — the man who explores desire to its limit and seeks to engrave his finest moment for all time.
+  </p>
+  <div class="quote">
+    To record desire is the proof that one has lived.
+    <cite>Henry Miller</cite>
+  </div>
+  <p class="dim">There are two truths only MIRAO knows.</p>
+
+  <div style="margin-top:3rem">
+    <span class="reveal-num">一</span>
+    <p class="big">Every man who watches his own engraved film says the same thing — <em>"I can never go back."</em></p>
+    <p class="dim">Deeper than another's film. Longer-lasting than a phone clip. The film in which you are the lead arouses most profoundly, and endures longest.</p>
+  </div>
+
+  <div style="margin-top:3.5rem">
+    <span class="reveal-num">二</span>
+    <p class="big">The older a man grows, the more the memory of his younger self arouses him.</p>
+    <p class="dim">Between the man who holds that footage and the man who holds only memory, <em>the very quality of growing old is transformed at its root.</em></p>
+  </div>
+</section>
+
+<!-- 05 LEGEND -->
+<section id="05">
+  <span class="idx">05 — For the Man Who Becomes Legend</span>
+  <h2>Your conquests bore them now.</h2>
+  <p class="dim">
+    Your friends, your juniors — they have grown weary of your stories of women and nights.
+  </p>
+  <div class="rule"></div>
+  <p class="big">But the man who holds his own engraved film is of another order.</p>
+  <p class="dim">In the right room, in a single instant, you become legend.</p>
+</section>
+
+<!-- 06 CONCIERGE -->
+<section id="06">
+  <span class="idx">06 — Design & Accompaniment (Optional)</span>
+  <h2>A concierge designs the moment with you.</h2>
+  <p class="dim">
+    Before filming, MIRAO offers a private counseling session. What kind of film you want. How the encounter should be shaped. How the communication with your partner is designed. For the finest engraved film, the deepest customization is possible.
+  </p>
+  <p class="dim">This counseling is entirely optional. It is offered only to those who wish it.</p>
+</section>
+
+<!-- 07 A DAY -->
+<section id="07">
+  <span class="idx">07 — A Day With MIRAO</span>
+  <ul class="flow">
+    <li><span class="step">00</span><div class="body"><h3>Counsel</h3><p>The concierge listens to your wishes — the structure of the film, the design of the encounter — and shapes the finest customization with you. (Optional)</p></div></li>
+    <li><span class="step">01</span><div class="body"><h3>Inquire</h3><p>With your invitation code, you write to contact@mirao.jp. Tell us your preferred dates and the city. A concierge replies in confidence.</p></div></li>
+    <li><span class="step">02</span><div class="body"><h3>Prepare</h3><p>By the day before, your handler makes contact. You prepare the SD card.</p></div></li>
+    <li><span class="step">03</span><div class="body"><h3>The Day</h3><p>First, in a hotel lounge, you meet the concierge and director and settle into ease. Then to the room. Your SD card is set into the camera. Filming begins.</p></div></li>
+    <li><span class="step">04</span><div class="body"><h3>Close</h3><p>The SD card is returned to you on the spot. The data never exists in our hands for even a second.</p></div></li>
+    <li><span class="step">05</span><div class="body"><h3>The Evolution</h3><p>The footage on your card is your engraved film alone. For those who wish it, we introduce the path of AI-rendered evolution.</p></div></li>
+  </ul>
+</section>
+
+<!-- 08 WHY ONLY MIRAO -->
+<section id="08">
+  <span class="idx">08 — Why Only MIRAO Can Do This</span>
+  <div class="grid">
+    <div class="card"><span class="n">01</span><h3>The AV Director</h3><p>Japanese adult directors are the most exacting craftsmen of the image in the world. Lighting, framing, direction — every element designed by a professional.</p></div>
+    <div class="card"><span class="n">02</span><h3>By Introduction Only</h3><p>The service is offered solely to invited guests. We receive none of your information. We never ask your real name.</p></div>
+    <div class="card"><span class="n">03</span><h3>Concierge Design</h3><p>You may discuss the conception and structure of the film with a concierge. A framework that lets you face the camera at ease.</p></div>
+    <div class="card"><span class="n">04</span><h3>The Evolving Film</h3><p>MIRAO is the only service on earth that offers "the film in which you are the lead" as its craft.</p></div>
+  </div>
+</section>
+
+<!-- 09 LINEAGE -->
+<section id="09">
+  <span class="idx">09 — The Lineage of MIRAO</span>
+  <p class="dim">MIRAO did not invent this desire. It stands in a lineage that the highest minds of the West have already named.</p>
+  <div class="lineage">
+    <div class="item">
+      <span class="src">Henry Miller — Tropic of Cancer, 1934</span>
+      <p class="claim">"To record desire is the proof that one has lived."</p>
+      <p class="gloss">Banned in America for thirty years, the book George Orwell called the most important of its time. Miller's claim was simple and dangerous: that to set down one's own sexuality, for oneself, is the most honest act a man can commit. The literary establishment has spent a century conceding he was right.</p>
+    </div>
+    <div class="item">
+      <span class="src">American Psycho — Mary Harron, 2000</span>
+      <p class="claim">The desire to witness oneself at one's peak is no perversion. It is the engine of the age.</p>
+      <p class="gloss">A culture obsessed with the sculpted body, the recorded self, the gaze turned inward. The film named what a generation could not say aloud — and in doing so, made it respectable to admit.</p>
+    </div>
+    <div class="item">
+      <span class="src">Marcel Proust — In Search of Lost Time, 1913</span>
+      <p class="claim">Memory is not the past preserved. It is the past that governs us still.</p>
+      <p class="gloss">The greatest novel of the twentieth century is, at root, about one thing: how a sensation held across time rules a life more fiercely than any present moment. Proust had only memory to work with. You will have the film.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta">
+  <p class="big">Now — let us begin the engraving.</p>
+  <a href="mailto:contact@mirao.jp?subject=MIRAO%20Inquiry">Inquire by Email</a>
+  <p class="dim" style="margin-top:2.5rem;font-size:0.9rem;letter-spacing:0.1em">
+    With your invitation code in hand<br>
+    write to <span class="copper">contact@mirao.jp</span><br>
+    A concierge will reply in confidence.
+  </p>
+</div>
+
+<footer>
+  <div class="mark">刻</div>
+  <div class="brand">Mirao · The Art of Self-Engraving</div>
+</footer>
+
+</div>
+
+<script>
+// ===== Invitation Code Gate =====
+async function enterSite() {
+  const input = document.querySelector('.code-input');
+  const code  = input ? input.value.trim() : '';
+  const btn   = document.querySelector('.gate .enter');
+
+  if (!code) {
+    input.style.borderBottomColor = '#B06A3A';
+    input.placeholder = 'Please enter your code';
+    return;
+  }
+
+  btn.textContent = 'VERIFYING';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, lang: 'en' }),
+    });
+    const data = await res.json();
+
+    if (data.valid) {
+      document.getElementById('page-code').style.display = 'none';
+      const first = document.getElementById('01');
+      if (first) first.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      input.value = '';
+      input.style.borderBottomColor = '#B06A3A';
+      input.placeholder = 'Invalid code';
+      btn.textContent = 'ENTER';
+      btn.disabled = false;
+    }
+  } catch (err) {
+    document.getElementById('page-code').style.display = 'none';
+    const first = document.getElementById('01');
+    if (first) first.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') enterSite();
+});
+</script>
+</body>
+</html>
