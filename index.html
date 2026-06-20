@@ -6,7 +6,7 @@
 <title>MIRAO — 自刻映像の世界</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400&family=Noto+Sans+JP:wght@200;300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400&family=Noto+Serif+JP:wght@200;300;400;500;600;700;900&display=swap" rel="stylesheet">
 
 <style>
 /* ===== リセット ===== */
@@ -31,8 +31,8 @@ html { scroll-behavior: smooth; }
 body {
   background: var(--ink);
   color: var(--cream);
-  font-family: 'Noto Sans JP', 'Jost', sans-serif;
-  font-weight: 300;
+  font-family: 'Noto Serif JP', 'Jost', serif;
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -47,18 +47,16 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-family: 'Noto Sans JP', serif;
-  font-size: 90vw;
-  font-weight: 300;
-  color: var(--copper-pale);
-  opacity: 0.055;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 78vh;
+  color: rgba(176, 106, 58, 0.035);
   line-height: 1;
   pointer-events: none;
   user-select: none;
   z-index: 0;
   white-space: nowrap;
-  transition: opacity 0.8s ease;
 }
+@media (max-width: 640px) { #koku-bg { font-size: 60vh; } }
 
 /* ===== ページナビ ===== */
 #page-nav {
@@ -186,7 +184,7 @@ body {
   border: 1px solid var(--copper-dim);
   color: var(--copper-mid);
   padding: 0.68rem 2.9rem;
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: 'Noto Serif JP', sans-serif;
   font-size: 0.84rem;
   letter-spacing: 0.36em;
   cursor: pointer;
@@ -221,9 +219,9 @@ body {
 
 /* ===== PAGE 1：ファーストビュー ===== */
 .hero-head {
-  font-family: 'Jost', sans-serif;
+  font-family: 'Noto Serif JP', serif;
   font-size: clamp(1.8rem, 4.5vw, 2.3rem);
-  font-weight: 200;
+  font-weight: 700;
   color: var(--cream);
   line-height: 1.42;
   margin-bottom: 2.8rem;
@@ -248,31 +246,14 @@ body {
   line-height: 1.88;
   margin-top: 2.2rem;
   display: block;
-}
-
-.scroll-cue {
-  margin-top: 3.4rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.34em;
-  color: var(--gray-dim);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-weight: 300;
-}
-.scroll-cue::after {
-  content: '';
-  display: block;
-  width: 38px;
-  height: 1px;
-  background: var(--copper-dim);
+  font-weight: 500;
 }
 
 /* ===== PAGE 2：データ原則 ===== */
 .data-big {
-  font-family: 'Jost', sans-serif;
+  font-family: 'Noto Serif JP', serif;
   font-size: clamp(1.15rem, 3vw, 1.42rem);
-  font-weight: 200;
+  font-weight: 700;
   color: var(--cream);
   line-height: 1.82;
   margin-bottom: 2rem;
@@ -301,7 +282,7 @@ body {
   font-weight: 300;
 }
 .data-item::before { content: '—'; color: var(--copper-dim); }
-.data-item.no { text-decoration: line-through; opacity: 0.38; }
+.data-item.no { text-decoration: line-through; opacity: 0.68; }
 .data-item.yes { color: var(--cream); opacity: 1; border-bottom: none; }
 
 /* ===== PAGE 3：ミラオとは ===== */
@@ -314,9 +295,9 @@ body {
 }
 
 .miller-quote {
-  font-family: 'Jost', sans-serif;
+  font-family: 'Noto Serif JP', serif;
   font-size: 1.08rem;
-  font-weight: 300;
+  font-weight: 500;
   color: var(--cream);
   border-left: 1px solid var(--copper);
   padding-left: 1.25rem;
@@ -371,14 +352,14 @@ body {
 }
 
 .rival-strong {
-  font-family: 'Jost', sans-serif;
+  font-family: 'Noto Serif JP', serif;
   font-size: 1.28rem;
   color: var(--cream);
   letter-spacing: 0.11em;
   display: block;
   margin-top: 1.9rem;
   line-height: 1.98;
-  font-weight: 200;
+  font-weight: 700;
 }
 
 /* ===== PAGE 5：コンシェルジュ ===== */
@@ -447,9 +428,9 @@ body {
 }
 
 .value-finale {
-  font-family: 'Jost', sans-serif;
+  font-family: 'Noto Serif JP', serif;
   font-size: 1.22rem;
-  font-weight: 200;
+  font-weight: 700;
   color: var(--cream);
   line-height: 1.98;
   border-top: 1px solid var(--border);
@@ -532,9 +513,9 @@ body {
 }
 
 .ref-quote {
-  font-family: 'Jost', sans-serif;
+  font-family: 'Noto Serif JP', serif;
   font-size: 1.06rem;
-  font-weight: 300;
+  font-weight: 500;
   color: var(--cream);
   line-height: 1.92;
   margin-bottom: 0.82rem;
@@ -576,9 +557,9 @@ body {
 }
 
 .reserve-line {
-  font-family: 'Jost', sans-serif;
+  font-family: 'Noto Serif JP', serif;
   font-size: clamp(1.2rem, 3.2vw, 1.55rem);
-  font-weight: 200;
+  font-weight: 700;
   color: var(--cream);
   letter-spacing: 0.11em;
   display: block;
@@ -590,19 +571,28 @@ body {
   border: 1px solid var(--copper-dim);
   color: var(--copper-mid);
   padding: 0.92rem 3.1rem;
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: 'Noto Serif JP', serif;
   font-size: 0.7rem;
   letter-spacing: 0.34em;
   cursor: pointer;
   transition: all 0.38s;
   display: inline-block;
-  margin-bottom: 3.2rem;
-  font-weight: 300;
+  margin-bottom: 2rem;
+  font-weight: 400;
+  text-decoration: none;
 }
 .reserve-btn:hover {
   background: var(--copper);
   color: var(--ink);
   border-color: var(--copper);
+}
+
+.reserve-note {
+  font-size: 0.82rem;
+  color: var(--gray);
+  letter-spacing: 0.1em;
+  line-height: 2.2;
+  margin-bottom: 3.2rem;
 }
 
 .footer-logo {
@@ -676,7 +666,6 @@ body {
       普通のハメ撮りにも <span class="dash">—</span> 飽きた
     </div>
     <span class="strong-line reveal d3">ミラオだけが知る遊び方がある</span>
-    <p class="scroll-cue reveal d4">続きを読む</p>
   </section>
 
   <!-- PAGE 2：データ原則 -->
@@ -919,7 +908,12 @@ body {
   <!-- PAGE 10：予約 -->
   <section id="page-reserve" data-sec="10">
     <span class="reserve-line reveal">では　自刻を始めましょう</span>
-    <button class="reserve-btn reveal d1">予約フォームへ</button>
+    <a href="mailto:contact@mirao.jp?subject=MIRAO%20Inquiry" class="reserve-btn reveal d1">メールでお問い合わせ</a>
+    <p class="reserve-note reveal d2">
+      招待コードをお持ちの上<br>
+      <span style="color: var(--copper-mid);">contact@mirao.jp</span> までご連絡ください<br>
+      コンシェルジュが機密にてご返信します
+    </p>
     <span class="footer-logo">MIRAO</span>
     <span class="footer-sub">刻　自刻映像の世界</span>
   </section>
