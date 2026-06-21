@@ -47,16 +47,18 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-family: 'Noto Serif JP', serif;
-  font-size: 78vh;
-  color: rgba(176, 106, 58, 0.035);
-  line-height: 1;
+  width: calc(78vh * 138 / 134);
+  height: 78vh;
+  background: url('images/koku_D_gold.png') no-repeat center / contain;
+  opacity: 0.10;
   pointer-events: none;
   user-select: none;
   z-index: 0;
-  white-space: nowrap;
+  display: none;
 }
-@media (max-width: 640px) { #koku-bg { font-size: 60vh; } }
+@media (max-width: 640px) {
+  #koku-bg { width: calc(60vh * 138 / 134); height: 60vh; }
+}
 
 /* ===== ページナビ ===== */
 #page-nav {
@@ -632,7 +634,7 @@ body {
 <body>
 
 <!-- 背景「刻」 -->
-<div id="koku-bg" aria-hidden="true">刻</div>
+<div id="koku-bg" aria-hidden="true"></div>
 
 <!-- ページナビ -->
 <nav id="page-nav" aria-label="ページナビゲーション">
@@ -965,6 +967,7 @@ async function enterSite() {
 
     if (data.valid) {
       document.getElementById('page-code').style.display = 'none';
+      document.getElementById('koku-bg').style.display = 'block';
       const first = document.querySelector('[data-sec="1"]');
       if (first) first.scrollIntoView({ behavior: 'smooth' });
     } else {
@@ -977,6 +980,7 @@ async function enterSite() {
   } catch (err) {
     // API接続エラー時もHPに入れる（フォールバック）
     document.getElementById('page-code').style.display = 'none';
+    document.getElementById('koku-bg').style.display = 'block';
     const first = document.querySelector('[data-sec="1"]');
     if (first) first.scrollIntoView({ behavior: 'smooth' });
   }
