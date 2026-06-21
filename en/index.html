@@ -35,12 +35,14 @@ body{
   position:fixed;
   top:50%;left:50%;
   transform:translate(-50%,-50%);
-  font-family:var(--jp);
-  font-size:78vh;
-  color:rgba(176,106,58,0.035);
+  width:calc(60vmin * 138 / 134);
+  height:60vmin;
+  background:url('../images/koku_D_gold.png') no-repeat center / contain;
+  opacity:0.10;
   z-index:0;
   pointer-events:none;
   user-select:none;
+  display:none;
 }
 .wrap{position:relative;z-index:1}
 
@@ -52,15 +54,17 @@ body{
   text-align:center;
   padding:2rem;
 }
-.gate .mark{
-  font-family:var(--jp);
-  font-size:5rem;
-  color:var(--copper);
-  font-weight:200;
-  line-height:1;
+.gate-mark{
   margin-bottom:2.5rem;
+  line-height:1;
   opacity:0;
   animation:rise 1.6s ease forwards;
+}
+.gate-mark img{
+  width:150px;
+  height:auto;
+  display:block;
+  margin:0 auto;
 }
 .gate .brand{
   font-family:var(--serif);
@@ -316,17 +320,17 @@ footer .brand{
 @media(max-width:680px){
   .grid{grid-template-columns:1fr}
   section{padding:6rem 1.6rem}
-  .koku-bg{font-size:60vh}
+  .koku-bg{height:50vmin;width:calc(50vmin * 138 / 134)}
 }
 </style>
 </head>
 <body>
-<div class="koku-bg">刻</div>
+<div class="koku-bg" aria-hidden="true"></div>
 <div class="wrap">
 
 <!-- GATE -->
 <div class="gate" id="page-code">
-  <div class="mark">刻</div>
+  <div class="gate-mark"><img src="../images/koku_D_gold.png" alt="刻" width="150" height="146"></div>
   <div class="brand">Mirao</div>
   <div class="note">
     This service is by introduction only.<br>
@@ -529,6 +533,7 @@ async function enterSite() {
 
     if (data.valid) {
       document.getElementById('page-code').style.display = 'none';
+      document.querySelector('.koku-bg').style.display = 'block';
       const first = document.getElementById('01');
       if (first) first.scrollIntoView({ behavior: 'smooth' });
     } else {
@@ -540,6 +545,7 @@ async function enterSite() {
     }
   } catch (err) {
     document.getElementById('page-code').style.display = 'none';
+    document.querySelector('.koku-bg').style.display = 'block';
     const first = document.getElementById('01');
     if (first) first.scrollIntoView({ behavior: 'smooth' });
   }
