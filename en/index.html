@@ -322,9 +322,13 @@ footer .brand{
   section{padding:6rem 1.6rem}
   .koku-bg{height:50vmin;width:calc(50vmin * 138 / 134)}
 }
+
+/* ===== Invitation gate control (hide content + scroll-lock until valid code) ===== */
+#site-content { display:none; }
+body.gate-locked { overflow:hidden; }
 </style>
 </head>
-<body>
+<body class="gate-locked">
 <div class="koku-bg" aria-hidden="true"></div>
 <div class="wrap">
 
@@ -344,6 +348,9 @@ footer .brand{
   >
   <button class="enter" onclick="enterSite()">Enter</button>
 </div>
+
+<!-- Content after entry (hidden via #site-content display:none until valid code) -->
+<div id="site-content">
 
 <!-- 01 PROVOCATION -->
 <section id="01">
@@ -505,6 +512,8 @@ footer .brand{
   <div class="brand">Mirao · The Art of Self-Engraving</div>
 </footer>
 
+</div><!-- /site-content -->
+
 </div>
 
 <script>
@@ -532,6 +541,8 @@ async function enterSite() {
     const data = await res.json();
 
     if (data.valid) {
+      document.body.classList.remove('gate-locked');
+      document.getElementById('site-content').style.display = 'block';
       document.getElementById('page-code').style.display = 'none';
       document.querySelector('.koku-bg').style.display = 'block';
       const first = document.getElementById('01');
@@ -544,10 +555,12 @@ async function enterSite() {
       btn.disabled = false;
     }
   } catch (err) {
-    document.getElementById('page-code').style.display = 'none';
-    document.querySelector('.koku-bg').style.display = 'block';
-    const first = document.getElementById('01');
-    if (first) first.scrollIntoView({ behavior: 'smooth' });
+    // Connection error: do not enter (entry only on verified code)
+    input.value = '';
+    input.style.borderBottomColor = '#B06A3A';
+    input.placeholder = 'Connection error. Please try again';
+    btn.textContent = 'ENTER';
+    btn.disabled = false;
   }
 }
 

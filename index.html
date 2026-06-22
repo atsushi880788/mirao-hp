@@ -108,6 +108,11 @@ body {
 /* ===== コンテンツ共通 ===== */
 .content { position: relative; z-index: 1; }
 
+/* ===== 入場ゲート制御（コード認証前は非表示＋スクロールロック） ===== */
+#site-content { display: none; }
+body.gate-locked { overflow: hidden; }
+body.gate-locked #page-nav { display: none; }
+
 /* ===== PAGE 0：招待コード（gate） ===== */
 #page-code {
   min-height: 100vh;
@@ -628,7 +633,7 @@ body {
 }
 </style>
 </head>
-<body>
+<body class="gate-locked">
 
 <!-- 背景「刻」 -->
 <div id="koku-bg" aria-hidden="true"></div>
@@ -666,6 +671,9 @@ body {
     >
     <button class="code-btn" onclick="enterSite()">入　る</button>
   </div>
+
+  <!-- 入場後コンテンツ（コード認証前は #site-content を display:none で非表示） -->
+  <div id="site-content">
 
   <!-- PAGE 1：ファーストビュー -->
   <section class="section" data-sec="1">
@@ -931,6 +939,8 @@ body {
     <span class="footer-sub">刻　自刻映像の世界</span>
   </section>
 
+  </div><!-- /site-content -->
+
 </div><!-- /content -->
 
 <script>
@@ -963,6 +973,8 @@ async function enterSite() {
     const data = await res.json();
 
     if (data.valid) {
+      document.body.classList.remove('gate-locked');
+      document.getElementById('site-content').style.display = 'block';
       document.getElementById('page-code').style.display = 'none';
       document.getElementById('koku-bg').style.display = 'block';
       const first = document.querySelector('[data-sec="1"]');
@@ -975,11 +987,12 @@ async function enterSite() {
       btn.disabled = false;
     }
   } catch (err) {
-    // API接続エラー時もHPに入れる（フォールバック）
-    document.getElementById('page-code').style.display = 'none';
-    document.getElementById('koku-bg').style.display = 'block';
-    const first = document.querySelector('[data-sec="1"]');
-    if (first) first.scrollIntoView({ behavior: 'smooth' });
+    // 通信エラー時は入場させない（コードが正しく検証された時のみ入場）
+    input.value = '';
+    input.style.borderBottomColor = '#7A3B2E';
+    input.placeholder = '通信エラー。再度お試しください';
+    btn.textContent = '入　る';
+    btn.disabled = false;
   }
 }
 
