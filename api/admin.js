@@ -205,11 +205,16 @@ export default async function handler(req, res) {
   `).join('');
 
   // ログ行
+  // 参照型：紹介者名はログに焼き付けた値（log.referrer）ではなく、
+  // ログのコード番号から現在の登録名マッピング（codeMap）を引いて表示する。
+  // codeMap は getCodeMap() で { ...DEFAULT_CODES, ...code_map } の順にマージ済み。
+  // → 優先順位：登録名（code_map）> DEFAULT_CODES > それも無ければ「未割当」。
+  // これにより後から名前を登録すれば過去ログも最新の名前で表示される。
   const logRows = logs.map(log => `
     <tr>
       <td>${esc(log.timestamp || '')}</td>
       <td class="code">${esc(log.code || '')}</td>
-      <td class="name">${esc(log.referrer || '')}</td>
+      <td class="name">${esc(codeMap[log.code] || '未割当')}</td>
     </tr>
   `).join('');
 

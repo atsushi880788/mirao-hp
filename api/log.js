@@ -1,26 +1,12 @@
 import { kv } from '@vercel/kv';
 
-// デフォルトのコード（KVに名前がない場合のフォールバック）
-const DEFAULT_CODES = {
-  '00111': '三島',
-  '00112': '小川',
-  '00113': '朝倉',
-  '00114': '未割当',
-  '00115': '未割当',
-  '00116': '未割当',
-  '00117': '未割当',
-  '00118': '未割当',
-  '00119': '未割当',
-  '00120': '未割当',
-};
-
-async function getCodeNames() {
-  const saved = await kv.get('code_names');
-  if (saved && typeof saved === 'object') {
-    return { ...DEFAULT_CODES, ...saved };
-  }
-  return { ...DEFAULT_CODES };
-}
+// 有効なコード一覧（コードの有効性チェックにのみ使用）。
+// 紹介者名の解決は「参照型」に変更したため、ここでは名前を持たない。
+// 名前は admin.js が code_map に保存し、表示時（admin.js）に code_map から解決する。
+const VALID_CODES = [
+  '00111', '00112', '00113', '00114', '00115',
+  '00116', '00117', '00118', '00119', '00120',
+];
 
 export default async function handler(req, res) {
   // CORSヘッダー
@@ -44,16 +30,8 @@ export default async function handler(req, res) {
 
   const trimmedCode = code.trim();
 
-  // KVから最新の紹介者名を取得
-  let codeNames;
-  try {
-    codeNames = await getCodeNames();
-  } catch {
-    codeNames = { ...DEFAULT_CODES };
-  }
-
-  // コードの有効性チェック
-  if (!codeNames[trimmedCode]) {
+  // コードの有効性チェック（名前は解決しない。存在チェックのみ）
+  if (!VALID_CODES.includes(trimmedCode)) {
     return res.status(200).json({ valid: false, message: '無効なコードです' });
   }
 
@@ -68,9 +46,11 @@ export default async function handler(req, res) {
       minute: '2-digit',
     });
 
+    // 参照型：名前は焼き付けない。コード番号（と日時・IP）のみ保存する。
+    // 表示時に admin.js が code から現在の登録名（code_map）を解決するため、
+    // 後から名前を登録すれば過去ログも最新の名前で表示される。
     const logEntry = {
       code: trimmedCode,
-      referrer: codeNames[trimmedCode],
       timestamp: now,
       ip: req.headers['x-forwarded-for'] || 'unknown',
     };
